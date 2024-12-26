@@ -1,0 +1,17 @@
+services:
+  db:
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_PASSWORD: root
+    image: postgres:15.8-alpine3.20
+    ports:
+    - 5432:5432
+  pgadmin:
+    depends_on:
+    - db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: luisotaviodesimone@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    image: dpage/pgadmin4:8.11.0
+    ports:
+    - 5050:80
