@@ -22,54 +22,58 @@ def random_filename(instance, filename):
 class Video(models.Model):
     title = models.CharField(max_length=100, unique=True, verbose_name="Título")
     description = models.TextField(verbose_name="Descrição")
-    thumbnail = models.ImageField(upload_to=random_filename, verbose_name="Thumbnail")
+    thumbnail = models.ImageField(upload_to="thumbnails/", verbose_name="Thumbnail")
     slug = models.SlugField(unique=True)
     published_at = models.DateTimeField(
         verbose_name="Publicado em", null=True, editable=False
     )
-    is_published = models.BooleanField(default=False, verbose_name="Publicado")
-    num_likes = models.IntegerField(default=0, verbose_name="Likes", editable=False)
+    is_published = models.BooleanField(
+        default=False, verbose_name="Publicado"  # pyright: ignore
+    )
+    num_likes = models.IntegerField(
+        default=0, verbose_name="Likes", editable=False  # pyright: ignore
+    )
     num_views = models.IntegerField(
-        default=0, verbose_name="Visualizações", editable=False
+        default=0, verbose_name="Visualizações", editable=False  # pyright: ignore
     )
     tags = models.ManyToManyField("Tag", verbose_name="Tags", related_name="videos")
-    author = models.ForeignKey(
-        "auth.User",
-        on_delete=models.PROTECT,
-        verbose_name="Autor",
-        related_name="videos",
-        editable=False,
-    )
+    # author = models.ForeignKey(
+    #     "auth.User",
+    #     on_delete=models.PROTECT,
+    #     verbose_name="Autor",
+    #     related_name="videos",
+    #     editable=False,
+    # )
 
-    def save(
-        self,
-        force_insert=False,
-        force_update=False,
-        using=None,
-        update_fields=None,
-    ):
-        if self.is_published and not self.published_at:
-            self.published_at = timezone.now()
-        return super().save(force_insert, force_update, using, update_fields)
+    # def save(
+    #     self,
+    #     force_insert=False,
+    #     force_update=False,
+    #     using=None,
+    #     update_fields=None,
+    # ):
+    #     if self.is_published and not self.published_at:
+    #         self.published_at = timezone.now()
+    #     return super().save(force_insert, force_update, using, update_fields)
 
-    def clean(self):
-        if self.is_published:
-            if not hasattr(self, "video_media"):
-                raise ValidationError("O vídeo não possui mídia associada.")
-            if self.video_media.status != VideoMedia.Status.PROCESS_FINISHED:
-                raise ValidationError("O vídeo não foi processado.")
+    # def clean(self):
+    #     if self.is_published:
+    #         if not hasattr(self, "video_media"):
+    #             raise ValidationError("O vídeo não possui mídia associada.")
+    #         if self.video_media.status != VideoMedia.Status.PROCESS_FINISHED:
+    #             raise ValidationError("O vídeo não foi processado.")
 
-    def get_video_status_display(self):
-        if not hasattr(self, "video_media"):
-            return "Pendente"
-        return self.video_media.get_status_display()
+    # def get_video_status_display(self):
+    #     if not hasattr(self, "video_media"):
+    #         return "Pendente"
+    #     return self.video_media.get_status_display()
 
     class Meta:
         verbose_name = "Vídeo"
         verbose_name_plural = "Vídeos"
 
     def __str__(self):
-        return self.title
+        return str(self.title)
 
 
 class VideoMedia(models.Model):
@@ -110,4 +114,4 @@ class Tag(models.Model):
         verbose_name_plural = "Tags"
 
     def __str__(self):
-        return self.name
+        return str(self.name)
