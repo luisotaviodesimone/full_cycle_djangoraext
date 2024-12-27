@@ -1,4 +1,5 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
 {% block content %}
     <form id="upload-form" method="post" enctype="multipart/form-data">
         <p id="errornote" class="errornote hidden"></p>
@@ -12,5 +13,20 @@
         <div class="form-row">
             <input type="file" name="video" accept="video/mp4" />
         </div>
+        <div class="submit-row">
+            <input type="submit"
+                   value="Fazer upload"
+                   class="default"
+                   name="btnUploadVideo"
+                   id="btnUploadVideo" />
+        </div>
     </form>
+    <div id="progress-bar" style="width: 100%; background: #f3f3f3;">
+        <div id="progress"
+             style="width: 0%;
+                    height: 20px;
+                    background: #4caf50;
+                    text-align: center">0%</div>
+    </div>
+    <script type="text/javascript" src="{% static 'js/upload_video.js' %}"></script>
 {% endblock %}
