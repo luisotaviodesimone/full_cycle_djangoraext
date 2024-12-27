@@ -12,9 +12,15 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env()
+environ.Env().read_env()
+
+print(env("DATABASE_HOST"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -37,7 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "core"
+    "core",
 ]
 
 MIDDLEWARE = [
@@ -83,9 +89,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "mydb",
         "USER": "postgres",
-        "PASSWORD": "root",
-        "HOST": "localhost",
-        # "HOST": "postgres.tds-local.duckdns.org",
+        "PASSWORD": env("DATABASE_PASSWORD"),
+        # "HOST": "localhost",
+        "HOST": env("DATABASE_HOST"),
         "PORT": "5432",
     }
 }
