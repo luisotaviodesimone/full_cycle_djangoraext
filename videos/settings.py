@@ -85,6 +85,7 @@ DATABASES = {
         "USER": "postgres",
         "PASSWORD": "root",
         "HOST": "localhost",
+        # "HOST": "postgres.tds-local.duckdns.org",
         "PORT": "5432",
     }
 }
