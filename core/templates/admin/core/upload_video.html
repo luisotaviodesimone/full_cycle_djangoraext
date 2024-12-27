@@ -1,11 +1,16 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=100%, initial-scale=1.0">
-  <title>Django</title>
-</head>
-<body>
- <h1>Título</h1> 
-</body>
-</html>
+{% extends "admin/base_site.html" %}
+{% block content %}
+    <form id="upload-form" method="post" enctype="multipart/form-data">
+        <p id="errornote" class="errornote hidden"></p>
+        {% csrf_token %}
+        <div class="form-row">
+            <strong>Título:</strong> {{ video.title }}
+            <br />
+            <strong>Status do vídeo:</strong>
+            {{ video.get_video_status_display }}
+        </div>
+        <div class="form-row">
+            <input type="file" name="video" accept="video/mp4" />
+        </div>
+    </form>
+{% endblock %}

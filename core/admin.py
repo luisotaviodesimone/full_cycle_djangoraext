@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.shortcuts import render
 from django.urls import path, reverse
+from django.utils.html import format_html
 
 from core.models import Tag, Video
 
@@ -18,7 +19,7 @@ class VideoAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path("<int:id>/upload-video", self.upload_video, name="core_video_create")
+            path("<int:id>/upload-video", self.upload_video, name="core_video_upload")
         ]
 
         return custom_urls + urls
