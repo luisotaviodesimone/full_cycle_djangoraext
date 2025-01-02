@@ -9,7 +9,7 @@ async function handleFormSubmit(event) {
   const fileInput = event.target.querySelector('input[type="file"]');
 
   if (fileInput.files.legth === 0) {
-    alert('Selection um arquivo primeiro!');
+    alert('Selecione um arquivo primeiro!');
     changeSubmitStatus(false);
     return;
   }
