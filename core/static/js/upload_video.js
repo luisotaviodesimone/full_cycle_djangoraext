@@ -4,11 +4,11 @@ const MAX_SIMULTANEOUS_UPLOADS = 2;
 document.getElementById('upload-form').addEventListener('submit', handleFormSubmit);
 
 async function handleFormSubmit(event) {
-  event.prevendDefault();
+  event.preventDefault();
   changeSubmitStatus(true);
   const fileInput = event.target.querySelector('input[type="file"]');
 
-  if (fileInput.files.legth === 0) {
+  if (fileInput.files.length === 0) {
     alert('Selecione um arquivo primeiro!');
     changeSubmitStatus(false);
     return;
