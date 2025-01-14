@@ -94,7 +94,11 @@ async function handleFormSubmit(event) {
       await Promise.race(activeUploads);
     }
   }
-
+  /**
+   * @param {string} fileName
+   * @param {number} totalChunks
+   * @return {void}
+  **/
   async function finishUpload(fileName, totalChunks) {
     const formData = new FormData();
     formData.append('csrfmiddlewaretoken', document.querySelector('input[name="csrfmiddlewaretoken"]').value);
