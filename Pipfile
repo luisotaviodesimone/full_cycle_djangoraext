@@ -10,6 +10,8 @@ psycopg2-binary = "2.9.10"
 django-environ = "0.11.2"
 
 [dev-packages]
+django-types = "*"
+django-stubs = "*"
 
 [requires]
 python_version = "3.12"
