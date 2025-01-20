@@ -6,9 +6,9 @@ from django.shortcuts import render
 from django.urls import path, reverse
 from django.utils.html import format_html
 
-from core.form import VideoChunkUploadForm
+from core.form import VideoChunkFinishUploadForm, VideoChunkUploadForm
 from core.models import Tag, Video
-from core.services import VideoService
+from core.services import VideoService, create_video_service_factory
 
 
 class VideoAdmin(admin.ModelAdmin):
@@ -40,7 +40,8 @@ class VideoAdmin(admin.ModelAdmin):
             form = VideoChunkUploadForm(request.POST, request.FILES)
             if not form.is_valid():
                 return JsonResponse({"error": form.errors}, status=400)
-            VideoService().process_upload(
+            video_service = create_video_service_factory()
+            video_service.process_upload(
                 video_id=id,
                 chunk_index=form.cleaned_data["chunkIndex"],
                 chunk=form.cleaned_data["chunk"].read(),
@@ -57,7 +58,21 @@ class VideoAdmin(admin.ModelAdmin):
         return format_html(f'<a href="{url}">Upload</a>')
 
     def finish_upload_video(self, request, id):
-        return HttpResponse(b"OKAY")
+        if request.method != "POST":
+            return JsonResponse({"error": "Invalid method"}, status=405)
+
+        form = VideoChunkFinishUploadForm(request.POST)
+
+        if not form.is_valid():
+            return JsonResponse({"error": form.errors}, status=400)
+
+        video_service = create_video_service_factory()
+        video_service.finalize_upload(
+            video_id=id,
+            total_chunks=form.cleaned_data["totalChunks"],
+        )
+
+        return JsonResponse({"message": "Upload finished"})
 
 
 admin.site.register(Video, VideoAdmin)
