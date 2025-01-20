@@ -72,7 +72,7 @@ class VideoAdmin(admin.ModelAdmin):
             total_chunks=form.cleaned_data["totalChunks"],
         )
 
-        return JsonResponse({"message": "Upload finished"})
+        return JsonResponse({"message": "Upload finished"}, status=200)
 
 
 admin.site.register(Video, VideoAdmin)
