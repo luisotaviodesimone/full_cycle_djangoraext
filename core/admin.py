@@ -27,6 +27,25 @@ class VideoAdmin(admin.ModelAdmin):
         "redirect_to_upload",
     )
 
+    def video_status(self, obj: Video) -> str:
+        return obj.get_video_status_display()
+
+    def get_readonly_fields(self, request: HttpRequest, obj: Any | None) -> list[str]:
+        return (
+            # if video is being created
+            [
+                "video_status",
+                "is_published",
+                "published_at",
+                "num_likes",
+                "num_views",
+                "author",
+            ]
+            if not obj
+            # if video is being edited
+            else ["video_status", "published_at", "num_likes", "num_views", "author"]
+        )
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -43,6 +62,11 @@ class VideoAdmin(admin.ModelAdmin):
         ]
 
         return custom_urls + urls
+
+    def save_model(self, request: HttpRequest, obj, form, change) -> None:
+        if not obj.pk:
+            obj.author = request.user
+        super().save_model(request, obj, form, change)
 
     @csrf_protect_m
     def upload_video_view(self, request, id):
