@@ -40,13 +40,13 @@ class Video(models.Model):
         default=0, verbose_name="Visualizações", editable=False  # pyright: ignore
     )
     tags = models.ManyToManyField("Tag", verbose_name="Tags", related_name="videos")
-    # author = models.ForeignKey(
-    #     "auth.User",
-    #     on_delete=models.PROTECT,
-    #     verbose_name="Autor",
-    #     related_name="videos",
-    #     editable=False,
-    # )
+    author = models.ForeignKey(
+        "auth.User",
+        on_delete=models.PROTECT,
+        verbose_name="Autor",
+        related_name="videos",
+        editable=False,
+    )
 
     # def save(
     #     self,
@@ -66,10 +66,10 @@ class Video(models.Model):
     #         if self.video_media.status != VideoMedia.Status.PROCESS_FINISHED:
     #             raise ValidationError("O vídeo não foi processado.")
 
-    # def get_video_status_display(self):
-    #     if not hasattr(self, "video_media"):
-    #         return "Pendente"
-    #     return self.video_media.get_status_display()
+    def get_video_status_display(self):
+        if not hasattr(self, "video_media"):
+            return "Pendente"
+        return self.video_media.get_status_display()
 
     class Meta:
         verbose_name = "Vídeo"
@@ -77,6 +77,7 @@ class Video(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class VideoMedia(models.Model):
 
