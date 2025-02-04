@@ -24,7 +24,7 @@ class VideoService:
     storage: "Storage"
 
     def get_chunk_directory(self, video_id: int) -> str:
-        return f"/tmp/videos/{video_id}"
+        return f"../videos/{video_id}"
 
     def find_video(self, video_id: int) -> Video:
         return Video.objects.get(id=video_id)

@@ -172,3 +172,4 @@ cython_debug/
 
 # Custom Ignored files
 django/thumbnails/*
+videos
