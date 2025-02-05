@@ -11,47 +11,8 @@ import (
 )
 
 func main() {
-	chunksFolder := "/tmp/videos/1"
-	files := getAllFilesInDir(chunksFolder)
-	fileNumbers := []int{}
-
-	for _, file := range files {
-		chunkNumber := extractNumber(file)
-		// log.Default().Println(string(chunkNumber))
-		fileNumbers = append(fileNumbers, chunkNumber)
-	}
-
-	// sortedFiles := bubbleSortFiles(fileNumbers)
-	sortedFiles := mergeChunks(chunksFolder, "")
-
-	fmt.Println(sortedFiles)
-
-}
-
-func bubbleSortFiles(numbers []int) []int {
-	orderedNumbers := make([]int, len(numbers))
-	copy(orderedNumbers, numbers)
-	numbersLength := len(orderedNumbers)
-	var swapped bool
-
-	for currentNumber := 0; currentNumber < numbersLength-1; currentNumber++ {
-		swapped = false
-		for currentSwap := 0; currentSwap < numbersLength-currentNumber-1; currentSwap++ {
-			nextNumber := orderedNumbers[currentSwap+1]
-			previousNumber := orderedNumbers[currentSwap]
-			if previousNumber > nextNumber {
-				orderedNumbers[currentSwap] = nextNumber
-				orderedNumbers[currentSwap+1] = previousNumber
-				swapped = true
-			}
-		}
-		if !swapped {
-			break
-		}
-
-	}
-
-	return orderedNumbers
+  chunksDir := "../videos/1"
+  mergeChunks(chunksDir, "merged.mp4")
 }
 
 func extractNumber(fileName string) int {
@@ -67,7 +28,7 @@ func extractNumber(fileName string) int {
 	return chunkNumber
 }
 
-func mergeChunks(inputDir, outputDir string) error {
+func mergeChunks(inputDir, outputFile string) error {
 	chunks, error := filepath.Glob(filepath.Join(inputDir, "*.chunk"))
 
 	if error != nil {
@@ -78,21 +39,63 @@ func mergeChunks(inputDir, outputDir string) error {
 		return extractNumber(chunks[i]) < extractNumber(chunks[j])
 	})
 
-  output, error := os.Create(outputDir)
+	output, error := os.Create(outputFile)
 
-  if error != nil {
-    return fmt.Errorf("failed to create output file: %v", error)
-  }
+	if error != nil {
+		return fmt.Errorf("failed to create output file: %v", error)
+	}
 
-  defer output.Close()
+	defer output.Close()
+
+	for _, chunk := range chunks {
+		input, error := os.Open(chunk)
+
+		if error != nil {
+			return fmt.Errorf("failed to open chunk: %v", error)
+		}
+
+		_, error = output.ReadFrom(input)
+
+		if error != nil {
+			return fmt.Errorf("failed to write chunk %s to output: %v", chunk, error)
+		}
+
+		input.Close()
+	}
 
 	return nil
 }
 
-func getAllFilesInDir(dirPath string) []string {
-	files, err := filepath.Glob(dirPath + "/*")
-	if err != nil {
-		fmt.Println(err)
-	}
-	return files
-}
+// func getAllFilesInDir(dirPath string) []string {
+// 	files, err := filepath.Glob(dirPath + "/*")
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+// 	return files
+// }
+
+// func bubbleSortFiles(numbers []int) []int {
+// 	orderedNumbers := make([]int, len(numbers))
+// 	copy(orderedNumbers, numbers)
+// 	numbersLength := len(orderedNumbers)
+// 	var swapped bool
+
+// 	for currentNumber := 0; currentNumber < numbersLength-1; currentNumber++ {
+// 		swapped = false
+// 		for currentSwap := 0; currentSwap < numbersLength-currentNumber-1; currentSwap++ {
+// 			nextNumber := orderedNumbers[currentSwap+1]
+// 			previousNumber := orderedNumbers[currentSwap]
+// 			if previousNumber > nextNumber {
+// 				orderedNumbers[currentSwap] = nextNumber
+// 				orderedNumbers[currentSwap+1] = previousNumber
+// 				swapped = true
+// 			}
+// 		}
+// 		if !swapped {
+// 			break
+// 		}
+
+// 	}
+
+// 	return orderedNumbers
+// }
