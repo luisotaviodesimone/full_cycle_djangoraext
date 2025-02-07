@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-  chunksDir := "../videos/1"
+  chunksDir := "../videos/5"
   mergeChunks(chunksDir, "merged.mp4")
 }
 
@@ -29,35 +29,35 @@ func extractNumber(fileName string) int {
 }
 
 func mergeChunks(inputDir, outputFile string) error {
-	chunks, error := filepath.Glob(filepath.Join(inputDir, "*.chunk"))
+	chunks, err := filepath.Glob(filepath.Join(inputDir, "*.chunk"))
 
-	if error != nil {
-		return fmt.Errorf("failed to find chunks: %v", error)
+	if err != nil {
+		return fmt.Errorf("failed to find chunks: %v", err)
 	}
 
 	sort.Slice(chunks, func(i, j int) bool {
 		return extractNumber(chunks[i]) < extractNumber(chunks[j])
 	})
 
-	output, error := os.Create(outputFile)
+	output, err := os.Create(outputFile)
 
-	if error != nil {
-		return fmt.Errorf("failed to create output file: %v", error)
+	if err != nil {
+		return fmt.Errorf("failed to create output file: %v", err)
 	}
 
 	defer output.Close()
 
 	for _, chunk := range chunks {
-		input, error := os.Open(chunk)
+		input, err := os.Open(chunk)
 
-		if error != nil {
-			return fmt.Errorf("failed to open chunk: %v", error)
+		if err != nil {
+			return fmt.Errorf("failed to open chunk: %v", err)
 		}
 
-		_, error = output.ReadFrom(input)
+		_, err = output.ReadFrom(input)
 
-		if error != nil {
-			return fmt.Errorf("failed to write chunk %s to output: %v", chunk, error)
+		if err != nil {
+			return fmt.Errorf("failed to write chunk %s to output: %v", chunk, err)
 		}
 
 		input.Close()
