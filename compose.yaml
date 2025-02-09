@@ -7,6 +7,23 @@ services:
     ports:
     - 5432:5432
     restart: always
+  go_app_dev:
+    build:
+      context: ./golang/
+      dockerfile: Dockerfile
+    environment:
+      DEBUG: "true"
+      POSTGRES_DB: converter
+      POSTGRES_HOST: db
+      POSTGRES_PASSWORD: root
+      POSTGRES_PORT: "5432"
+      POSTGRES_SSLMODE: disable
+      POSTGRES_USER: postgres
+    stdin_open: true
+    tty: true
+    volumes:
+    - .:/app
+    - external-storage:/media/uploads
   pgadmin:
     depends_on:
     - db
@@ -17,3 +34,6 @@ services:
     ports:
     - 5050:80
     restart: always
+volumes:
+  external-storage:
+    external: true

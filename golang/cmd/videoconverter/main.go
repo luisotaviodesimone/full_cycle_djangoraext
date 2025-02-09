@@ -1,101 +1,59 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
-	"path/filepath"
-	"regexp"
-	"sort"
-	"strconv"
+	"videoconverter/internal/converter"
+
+  _ "github.com/lib/pq"
 )
 
 func main() {
-  chunksDir := "../videos/5"
-  mergeChunks(chunksDir, "merged.mp4")
-}
-
-func extractNumber(fileName string) int {
-	regex := regexp.MustCompile(`\d+`)
-	numberStr := regex.FindString(filepath.Base(fileName))
-	chunkNumber, error := strconv.Atoi(numberStr)
-
-	if error != nil {
-		log.Fatal(error)
-		return -1
-	}
-
-	return chunkNumber
-}
-
-func mergeChunks(inputDir, outputFile string) error {
-	chunks, err := filepath.Glob(filepath.Join(inputDir, "*.chunk"))
+	db, err := connectPostgres()
 
 	if err != nil {
-		return fmt.Errorf("failed to find chunks: %v", err)
+    panic(err)
 	}
 
-	sort.Slice(chunks, func(i, j int) bool {
-		return extractNumber(chunks[i]) < extractNumber(chunks[j])
-	})
+	vc := converter.New(db)
 
-	output, err := os.Create(outputFile)
-
-	if err != nil {
-		return fmt.Errorf("failed to create output file: %v", err)
-	}
-
-	defer output.Close()
-
-	for _, chunk := range chunks {
-		input, err := os.Open(chunk)
-
-		if err != nil {
-			return fmt.Errorf("failed to open chunk: %v", err)
-		}
-
-		_, err = output.ReadFrom(input)
-
-		if err != nil {
-			return fmt.Errorf("failed to write chunk %s to output: %v", chunk, err)
-		}
-
-		input.Close()
-	}
-
-	return nil
+	vc.Handle([]byte(`{"video_id": 1, "path": "/media/uploads/1"}`))
 }
 
-// func getAllFilesInDir(dirPath string) []string {
-// 	files, err := filepath.Glob(dirPath + "/*")
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// 	return files
-// }
+func getEnvOrDefault(key, defaultValue string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
 
-// func bubbleSortFiles(numbers []int) []int {
-// 	orderedNumbers := make([]int, len(numbers))
-// 	copy(orderedNumbers, numbers)
-// 	numbersLength := len(orderedNumbers)
-// 	var swapped bool
+	return defaultValue
+}
 
-// 	for currentNumber := 0; currentNumber < numbersLength-1; currentNumber++ {
-// 		swapped = false
-// 		for currentSwap := 0; currentSwap < numbersLength-currentNumber-1; currentSwap++ {
-// 			nextNumber := orderedNumbers[currentSwap+1]
-// 			previousNumber := orderedNumbers[currentSwap]
-// 			if previousNumber > nextNumber {
-// 				orderedNumbers[currentSwap] = nextNumber
-// 				orderedNumbers[currentSwap+1] = previousNumber
-// 				swapped = true
-// 			}
-// 		}
-// 		if !swapped {
-// 			break
-// 		}
+func connectPostgres() (db *sql.DB, err error) {
+	postgresHost := getEnvOrDefault("POSTGRES_HOST", "localhost")
+	postgresPort := getEnvOrDefault("POSTGRES_PORT", "5432")
+	postgresUser := getEnvOrDefault("POSTGRES_USER", "postgres")
+	postgresPassword := getEnvOrDefault("POSTGRES_PASSWORD", "root")
+	postgresDB := getEnvOrDefault("POSTGRES_DB", "converter")
+  postgresSSL := getEnvOrDefault("POSTGRES_SSLMODE", "disable")
 
-// 	}
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", postgresHost, postgresPort, postgresUser, postgresPassword, postgresDB, postgresSSL)
 
-// 	return orderedNumbers
-// }
+	db, err = sql.Open("postgres", connStr)
+
+  if err != nil {
+    slog.Error("failed to connect to postgres", slog.String("error", err.Error()))
+    return nil, err
+  }
+
+  err = db.Ping()
+
+  if err != nil {
+    slog.Error("failed to ping postgres", slog.String("error", err.Error()))
+    return nil, err
+  }
+
+  slog.Info("Connected to postgres successfully!")
+	return db, nil
+}
