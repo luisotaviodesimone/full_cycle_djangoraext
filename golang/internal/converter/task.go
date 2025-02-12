@@ -13,10 +13,14 @@ import (
 	"sort"
 	"strconv"
 	"time"
+	"videoconverter/internal/rabbitmq"
+
+	"github.com/streadway/amqp"
 )
 
 type VideoConverter struct {
-	db *sql.DB
+	db             *sql.DB
+	rabbitmqClient *rabbitmq.RabbitClient
 }
 
 type VideoTask struct {
@@ -24,16 +28,18 @@ type VideoTask struct {
 	Path    string `json:"path"`
 }
 
-func New(db *sql.DB) *VideoConverter {
+func NewVideoConverter(db *sql.DB, rabbitmqClient *rabbitmq.RabbitClient) *VideoConverter {
 	return &VideoConverter{
-		db: db,
+		db:             db,
+		rabbitmqClient: rabbitmqClient,
 	}
 }
 
-func (vc *VideoConverter) Handle(msg []byte) {
+func (vc *VideoConverter) Handle(delivery amqp.Delivery) {
+  defer delivery.Ack(false)
 	var task VideoTask
 
-	if err := json.Unmarshal(msg, &task); err != nil {
+	if err := json.Unmarshal(delivery.Body, &task); err != nil {
 		vc.logError(task, "failed to unmarshal task", err)
 		return
 	}

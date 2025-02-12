@@ -19,6 +19,10 @@ services:
       POSTGRES_PORT: "5432"
       POSTGRES_SSLMODE: disable
       POSTGRES_USER: postgres
+      RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672/
+      CONVERSION_EXCHANGE: conversion_exchange
+      CONVERSION_QUEUE: video_conversion_queue
+      CONVERSION_KEY: conversion
     stdin_open: true
     tty: true
     volumes:
@@ -34,6 +38,14 @@ services:
     ports:
     - 5050:80
     restart: always
+  rabbitmq:
+    environment:
+      RABBITMQ_DEFAULT_PASS: admin
+      RABBITMQ_DEFAULT_USER: admin
+    image: rabbitmq:3-management
+    ports:
+    - 5672:5672
+    - 15672:15672
 volumes:
   external-storage:
     external: true
