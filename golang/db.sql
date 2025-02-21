@@ -1,12 +1,15 @@
-CREATE DATABASE converter;
+SELECT 'CREATE DATABASE converter'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'converter')\gexec
 
-CREATE TABLE processed_videos (
+\c converter
+
+CREATE TABLE IF NOT EXISTS processed_videos (
   video_id INT PRIMARY KEY,
   status VARCHAR(50) NOT NULL,
   processed_at TIMESTAMP NOT NULL
 );
 
-CREATE TABLE process_errors_log (
+CREATE TABLE IF NOT EXISTS process_errors_log (
   id SERIAL PRIMARY KEY,
   error_details JSONB NOT NULL,
   created_at TIMESTAMP NOT NULL

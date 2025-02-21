@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strconv"
-	"strings"
-	"time"
 	"videoconverter/internal/converter"
 	"videoconverter/internal/rabbitmq"
 
@@ -52,6 +49,7 @@ func main() {
 
 	rabbitMQURL := getEnvOrDefault("RABBITMQ_URL", "amqp://admin:admin@localhost:5672/")
 	rabbitClient, err := rabbitmq.NewRabbitClient(rabbitMQURL)
+	slog.Info("Connected to rabbit successfully!")
 	defer rabbitClient.Close()
 
 	if err != nil {
@@ -76,13 +74,6 @@ func main() {
 			vc.Handle(delivery)
 		}(d)
 	}
-}
-
-func contador(i float64) {
-	timeStr := strconv.FormatFloat(i, 'f', 3, 64)
-	fmt.Print(strings.Repeat("\b", len(timeStr)+len("Time running: secs")), "Time running: ", timeStr, "\bsecs")
-
-	time.Sleep(1 * time.Millisecond)
 }
 
 func getEnvOrDefault(key, defaultValue string) string {
