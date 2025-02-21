@@ -2,9 +2,10 @@ import os
 import shutil
 from dataclasses import dataclass
 
-from django.db import IntegrityError, transaction
-
 from core.models import Video, VideoMedia
+from videos import settings
+
+from django.db import IntegrityError, transaction
 
 
 class VideoMediaInvalidStatusException(Exception):
@@ -24,7 +25,7 @@ class VideoService:
     storage: "Storage"
 
     def get_chunk_directory(self, video_id: int) -> str:
-        return f"../videos/{video_id}"
+        return f"{settings.EXTERNAL_STORAGE}/{video_id}"
 
     def find_video(self, video_id: int) -> Video:
         return Video.objects.get(id=video_id)
@@ -114,8 +115,10 @@ class VideoService:
 
         return True
 
+
 def create_video_service_factory() -> VideoService:
     return VideoService(Storage())
+
 
 class Storage:
 

@@ -94,6 +94,7 @@ DATABASES = {
     }
 }
 
+EXTERNAL_STORAGE = env("EXTERNAL_STORAGE_PATH")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
