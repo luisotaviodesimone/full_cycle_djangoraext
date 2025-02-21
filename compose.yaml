@@ -7,11 +7,27 @@ services:
     ports:
     - 5432:5432
     restart: always
+  django:
+    build:
+      context: ./django
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PASSWORD: root
+      EXTERNAL_STORAGE_PATH: /media/uploads
+    ports:
+    - 8000:8000
+    volumes:
+    - ./django:/app
+    - external-storage:/media/uploads
   go_app_dev:
     build:
       context: ./golang/
       dockerfile: Dockerfile
     environment:
+      CONVERSION_EXCHANGE: conversion_exchange
+      CONVERSION_KEY: conversion
+      CONVERSION_QUEUE: video_conversion_queue
       DEBUG: "true"
       POSTGRES_DB: converter
       POSTGRES_HOST: db
@@ -20,13 +36,10 @@ services:
       POSTGRES_SSLMODE: disable
       POSTGRES_USER: postgres
       RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672/
-      CONVERSION_EXCHANGE: conversion_exchange
-      CONVERSION_QUEUE: video_conversion_queue
-      CONVERSION_KEY: conversion
     stdin_open: true
     tty: true
     volumes:
-    - .:/app
+    - ./golang:/app
     - external-storage:/media/uploads
   pgadmin:
     depends_on:
