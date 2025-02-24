@@ -41,7 +41,7 @@ func NewRabbitClient(connectionURL string) (*RabbitClient, error) {
 	}, nil
 }
 
-func (client *RabbitClient) ConsumeMessages(exchange, routingKey, queueName string) (<-chan amqp.Delivery, error) {
+func (client *RabbitClient) createQueueAndExchangeBindings(channel *amqp.Channel, exchange, routingKey, queueName string) (*amqp.Queue, error) {
 	if err := client.channel.ExchangeDeclare(
 		exchange,
 		"direct",
@@ -64,6 +64,16 @@ func (client *RabbitClient) ConsumeMessages(exchange, routingKey, queueName stri
 		return nil, fmt.Errorf("Failed to bind queue: %v", err)
 	}
 
+	return &queue, nil
+}
+
+func (client *RabbitClient) ConsumeMessages(exchange, routingKey, queueName string) (<-chan amqp.Delivery, error) {
+	queue, err := client.createQueueAndExchangeBindings(client.channel, exchange, routingKey, queueName)
+
+	if err != nil {
+		return nil, fmt.Errorf("Fail on queue/exchange/binding creation: %v", err)
+	}
+
 	messages, err := client.channel.Consume(
 		queue.Name,
 		"goapp",
@@ -79,6 +89,28 @@ func (client *RabbitClient) ConsumeMessages(exchange, routingKey, queueName stri
 	}
 
 	return messages, nil
+}
+
+func (client *RabbitClient) PublishMessages(exchange, routingKey string, queueName string, message []byte) error {
+
+	if _, err := client.createQueueAndExchangeBindings(client.channel, exchange, routingKey, queueName); err != nil {
+		return fmt.Errorf("Fail on queue/exchange/binding creation: %v", err)
+	}
+
+	if err := client.channel.Publish(
+		exchange,
+		routingKey,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        message,
+		},
+	); err != nil {
+		return fmt.Errorf("Failed to publish message: %v", err)
+	}
+
+	return nil
 }
 
 func (client *RabbitClient) Close() error {

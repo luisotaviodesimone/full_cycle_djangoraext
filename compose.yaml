@@ -25,6 +25,8 @@ services:
       context: ./golang/
       dockerfile: Dockerfile
     environment:
+      CONFIRMATION_KEY: finish-conversion
+      CONFIRMATION_QUEUE: video_confirmation_queue
       CONVERSION_EXCHANGE: conversion_exchange
       CONVERSION_KEY: conversion
       CONVERSION_QUEUE: video_conversion_queue

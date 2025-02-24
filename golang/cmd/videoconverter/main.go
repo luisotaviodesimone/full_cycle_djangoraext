@@ -59,9 +59,10 @@ func main() {
 	convertionExchange := getEnvOrDefault("CONVERSION_EXCHANGE", "conversion_exchange")
 	queueName := getEnvOrDefault("CONVERSION_QUEUE", "video_conversion_queue")
 	conversionRoutingKey := getEnvOrDefault("CONVERSION_KEY", "conversion")
+	confirmationKey := getEnvOrDefault("CONFIRMATION_KEY", "finish-conversion")
+	confirmationQueue := getEnvOrDefault("CONFIRMATION_QUEUE", "video_confirmation_queue")
 
 	vc := converter.NewVideoConverter(db, rabbitClient)
-
 	// vc.Handle([]byte(`{"video_id": 1, "path": "/media/uploads/1"}`))
 
 	msgs, err := rabbitClient.ConsumeMessages(convertionExchange, conversionRoutingKey, queueName)
@@ -71,7 +72,7 @@ func main() {
 
 	for d := range msgs {
 		go func(delivery amqp.Delivery) {
-			vc.Handle(delivery)
+			vc.Handle(delivery, convertionExchange, confirmationQueue, confirmationKey)
 		}(d)
 	}
 }

@@ -35,8 +35,8 @@ func NewVideoConverter(db *sql.DB, rabbitmqClient *rabbitmq.RabbitClient) *Video
 	}
 }
 
-func (vc *VideoConverter) Handle(delivery amqp.Delivery) {
-  defer delivery.Ack(false)
+func (vc *VideoConverter) Handle(delivery amqp.Delivery, conversionExch, confirmationQueue, confirmationKey string) {
+	defer delivery.Ack(false)
 	var task VideoTask
 
 	if err := json.Unmarshal(delivery.Body, &task); err != nil {
@@ -46,6 +46,7 @@ func (vc *VideoConverter) Handle(delivery amqp.Delivery) {
 
 	if IsProcessed(vc.db, task.VideoID) {
 		slog.Warn("Video already processed", slog.Int("video_id", task.VideoID))
+		delivery.Ack(false)
 		return
 	}
 
@@ -61,6 +62,15 @@ func (vc *VideoConverter) Handle(delivery amqp.Delivery) {
 	}
 
 	slog.Info("Video marked as processed", slog.Int("video_id", task.VideoID))
+
+	confirmationMessage := fmt.Appendf(nil, `{"video_id": %d, "path" : "%s"}`, task.VideoID, task.Path)
+
+	if err := vc.rabbitmqClient.PublishMessages(conversionExch, confirmationKey, confirmationQueue, confirmationMessage); err != nil {
+		vc.logError(task, "failed to publish confirmation message", err)
+    return
+	}
+
+  slog.Info("Confirmation message published", slog.Int("video_id", task.VideoID))
 
 	return
 }
@@ -85,10 +95,20 @@ func (vc *VideoConverter) processVideo(task *VideoTask) error {
 
 	slog.Info("Converting video to mpeg-dash", slog.String("path", task.Path))
 	ffmpegCmd := exec.Command("ffmpeg",
-		"-i",
-		mergedFile,
-		"-f",
-		"dash",
+		"-i", mergedFile,
+		"-map", "0",
+		"-c:v", "libx264",
+		"-b:v", "2M",
+		"-c:a", "aac",
+		"-b:a", "128k",
+		"-preset", "fast",
+		"-keyint_min", "60",
+		"-g", "60",
+		"-sc_threshold", "0",
+		"-f", "dash",
+		"-seg_duration", "4",
+		"-init_seg_name", "init-stream$RepresentationID$.m4s",
+		"-media_seg_name", "chunk-stream$RepresentationID$-$Number$.m4s",
 		filepath.Join(mpegDashPath, "output.mpd"),
 	)
 
