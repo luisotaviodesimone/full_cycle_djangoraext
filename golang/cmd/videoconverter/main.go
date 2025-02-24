@@ -7,6 +7,7 @@ import (
 	"os"
 	"videoconverter/internal/converter"
 	"videoconverter/internal/rabbitmq"
+	"videoconverter/pkg/log"
 
 	_ "github.com/lib/pq"
 	"github.com/streadway/amqp"
@@ -41,6 +42,11 @@ func connectPostgres() (db *sql.DB, err error) {
 }
 
 func main() {
+
+	isDebug := getEnvOrDefault("DEBUG", "true") == "true"
+	logger := log.NewLogger(isDebug)
+	slog.SetDefault(logger)
+
 	db, err := connectPostgres()
 
 	if err != nil {
