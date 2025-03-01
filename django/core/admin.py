@@ -1,12 +1,5 @@
 from typing import Any
 
-from django.contrib import admin, messages
-from django.contrib.auth.admin import csrf_protect_m
-from django.http import HttpRequest, JsonResponse
-from django.shortcuts import render
-from django.urls import path, reverse
-from django.utils.html import format_html
-
 from core.form import VideoChunkFinishUploadForm, VideoChunkUploadForm
 from core.models import Tag, Video
 from core.services import (
@@ -15,6 +8,13 @@ from core.services import (
     VideoMediaNotExistsException,
     create_video_service_factory,
 )
+
+from django.contrib import admin, messages
+from django.contrib.auth.admin import csrf_protect_m
+from django.http import HttpRequest, JsonResponse
+from django.shortcuts import render
+from django.urls import path, reverse
+from django.utils.html import format_html
 
 
 class VideoAdmin(admin.ModelAdmin):

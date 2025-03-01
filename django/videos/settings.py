@@ -94,7 +94,14 @@ DATABASES = {
     }
 }
 
-EXTERNAL_STORAGE = env("EXTERNAL_STORAGE_PATH")
+ENVIRONMENT = {
+    "EXTERNAL_STORAGE": env("EXTERNAL_STORAGE_PATH"),
+    "RABBITMQ_URL": env("RABBITMQ_URL"),
+    # "RABBITMQ_QUEUE": env("RABBITMQ_QUEUE"),
+    # "RABBITMQ_EXCHANGE": env("RABBITMQ_EXCHANGE"),
+    # "RABBITMQ_ROUTING_KEY": env("RABBITMQ_ROUTING_KEY"),
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

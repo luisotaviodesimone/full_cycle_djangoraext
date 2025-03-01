@@ -3,9 +3,8 @@ import shutil
 from dataclasses import dataclass
 
 from core.models import Video, VideoMedia
-from videos import settings
-
 from django.db import IntegrityError, transaction
+from videos import settings
 
 
 class VideoMediaInvalidStatusException(Exception):
@@ -25,7 +24,7 @@ class VideoService:
     storage: "Storage"
 
     def get_chunk_directory(self, video_id: int) -> str:
-        return f"{settings.EXTERNAL_STORAGE}/{video_id}"
+        return f"{settings.ENVIRONMENT["EXTERNAL_STORAGE"]}/{video_id}"
 
     def find_video(self, video_id: int) -> Video:
         return Video.objects.get(id=video_id)
