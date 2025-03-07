@@ -23,7 +23,6 @@
         {% csrf_token %}
         <div class="form-row">
             <strong>Título:</strong> {{ video.title }}
-            <button id="botao-de-teste">Esse botão</button>
             <br />
             <strong>Status do vídeo:</strong> {{ video.get_video_status_display }}
         </div>
