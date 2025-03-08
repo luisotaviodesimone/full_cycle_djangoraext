@@ -3,6 +3,8 @@ import shutil
 from dataclasses import dataclass
 
 from core.models import Video, VideoMedia
+from core.rabbitmq import create_rabbitmq_connection, use_rabbitmq_queue
+
 from django.db import IntegrityError, transaction
 from videos import settings
 
@@ -98,7 +100,7 @@ class VideoService:
             video_media.status = VideoMedia.Status.PROCESS_STARTED
             video_media.save()
 
-            # self.__produce_message(video_id, video_media.video_path, "chunks")
+            self.__produce_message(video_id, video_media.video_path, "chunks")
 
         except Video.video_media.RelatedObjectDoesNotExist:
             raise VideoMediaNotExistsException("Upload not started.")
@@ -113,6 +115,26 @@ class VideoService:
                 return False
 
         return True
+
+    def __produce_message(
+        self, video_id: int, video_path: str, routing_key: str
+    ) -> None:
+        with create_rabbitmq_connection() as connection:
+            queue = use_rabbitmq_queue(
+                queue_name=routing_key,
+                exchange_name=str(settings.ENVIRONMENT["RABBITMQ_EXCHANGE"]),
+                routing_key=routing_key,
+            )
+            with connection.Producer(serializer="json") as producer:
+                producer.publish(
+                    {
+                        "video_id": video_id,
+                        "video_path": video_path,
+                    },
+                    routing_key=queue.routing_key,
+                    exchange=queue.exchange,
+                    declare=[queue],
+                )
 
 
 def create_video_service_factory() -> VideoService:
