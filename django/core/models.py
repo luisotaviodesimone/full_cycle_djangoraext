@@ -2,11 +2,8 @@ import hashlib
 import os
 import time
 
-from django.core.exceptions import ValidationError
-
 # Create your models here.
 from django.db import models
-from django.utils import timezone
 
 
 def random_filename(instance, filename):

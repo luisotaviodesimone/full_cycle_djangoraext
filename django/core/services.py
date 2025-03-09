@@ -26,7 +26,7 @@ class VideoService:
     storage: "Storage"
 
     def get_chunk_directory(self, video_id: int) -> str:
-        return f"{settings.ENVIRONMENT["EXTERNAL_STORAGE"]}/{video_id}"
+        return f"{settings.ENVIRONMENT["CHUNKS_DIRECTORY"]}/{video_id}"
 
     def find_video(self, video_id: int) -> Video:
         return Video.objects.get(id=video_id)
@@ -136,6 +136,12 @@ class VideoService:
                     declare=[queue],
                 )
 
+    def upload_chunks_to_external_storage(self, video_id: int) -> None:
+        self.find_video(video_id)
+        source_path = self.get_chunk_directory(video_id)
+        dest_path = f'{settings.ENVIRONMENT["EXTERNAL_STORAGE"]}/{video_id}'
+        self.storage.move_chunks(source_path, dest_path)
+        # self.__produce_message(video_id, dest_path, 'conversion')
 
 def create_video_service_factory() -> VideoService:
     return VideoService(Storage())

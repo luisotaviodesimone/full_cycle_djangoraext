@@ -15,6 +15,7 @@ services:
       DATABASE_HOST: db
       DATABASE_PASSWORD: root
       EXTERNAL_STORAGE_PATH: /media/uploads
+      CHUNKS_DIRECTORY: /tmp/videos
       RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672/
       RABBITMQ_EXCHANGE: conversion_exchange
     ports:
