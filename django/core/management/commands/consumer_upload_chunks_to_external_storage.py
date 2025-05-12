@@ -1,8 +1,8 @@
 from core.rabbitmq import create_rabbitmq_connection, use_rabbitmq_queue
-
-from django.core.management import BaseCommand
 from core.services import create_video_service_factory
 from videos import settings
+
+from django.core.management import BaseCommand
 
 
 class Command(BaseCommand):
@@ -21,6 +21,6 @@ class Command(BaseCommand):
                     connection.drain_events()
 
     def process_message(self, body, message):
-        self.stdout.write(self.style.SUCCESS(f"Received message: {body}"))
-        # create_video_service_factory().up
+        self.stdout.write(self.style.SUCCESS(f"Processing message: {body}"))
+        create_video_service_factory().upload_chunks_to_external_storage(body["video_id"])
         message.ack()
