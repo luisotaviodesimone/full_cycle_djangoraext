@@ -15,7 +15,7 @@ class Command(BaseCommand):
         queue = use_rabbitmq_queue(routing_key, exchange_name, routing_key)
 
         with create_rabbitmq_connection() as connection:
-            with connection.Consumer(queue, callbacks=self.process_message):
+            with connection.Consumer(queue, callbacks=[self.process_message]):
                 while True:
                     self.stdout.write(self.style.SUCCESS("Waiting for messages..."))
                     connection.drain_events()

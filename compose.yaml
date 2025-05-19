@@ -12,12 +12,12 @@ services:
       context: ./django
       dockerfile: Dockerfile
     environment:
+      CHUNKS_DIRECTORY: /tmp/videos
       DATABASE_HOST: db
       DATABASE_PASSWORD: root
       EXTERNAL_STORAGE_PATH: /media/uploads
-      CHUNKS_DIRECTORY: /tmp/videos
-      RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672/
       RABBITMQ_EXCHANGE: conversion_exchange
+      RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672/
     ports:
     - 8000:8000
     volumes:
