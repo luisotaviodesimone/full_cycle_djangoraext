@@ -9,13 +9,12 @@ def create_rabbitmq_connection() -> Connection:
 
     connection = Connection(str(rabbitmq_url))
 
-    print("connection made")
-
     return connection
 
 
 def use_rabbitmq_queue(queue_name: str, exchange_name: str, routing_key: str) -> Queue:
 
-    queue = Queue(queue_name, Exchange(exchange_name), routing_key=routing_key)
+    exchange = Exchange(exchange_name, auto_delete=True)
+    queue = Queue(queue_name, exchange, routing_key=routing_key)
 
     return queue

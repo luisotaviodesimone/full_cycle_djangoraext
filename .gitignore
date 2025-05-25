@@ -171,5 +171,5 @@ cython_debug/
 .pypirc
 
 # Custom Ignored files
-django/thumbnails/*
+admin/thumbnails/*
 videos/*

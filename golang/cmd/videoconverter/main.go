@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
-	"os"
 	"videoconverter/internal/converter"
 	"videoconverter/internal/rabbitmq"
 	"videoconverter/pkg/log"

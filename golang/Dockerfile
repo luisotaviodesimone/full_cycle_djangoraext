@@ -4,8 +4,8 @@ RUN apk add --no-cache bash ffmpeg
 
 WORKDIR /app
 
-# COPY go.* .
+COPY go.* .
 
-# RUN go mod download
+RUN go mod download
 
-CMD ["bash"]
+CMD ["go", "run" ,"cmd/videoconverter/main.go"]

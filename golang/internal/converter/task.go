@@ -50,6 +50,7 @@ func (vc *VideoConverter) Handle(delivery amqp.Delivery, conversionExch, confirm
 		return
 	}
 
+  slog.Info("Processing video", slog.Int("video_id", task.VideoID), slog.String("path", task.Path))
 	if err := vc.processVideo(&task); err != nil {
 		return
 	}
@@ -67,10 +68,10 @@ func (vc *VideoConverter) Handle(delivery amqp.Delivery, conversionExch, confirm
 
 	if err := vc.rabbitmqClient.PublishMessages(conversionExch, confirmationKey, confirmationQueue, confirmationMessage); err != nil {
 		vc.logError(task, "failed to publish confirmation message", err)
-    return
+		return
 	}
 
-  slog.Info("Confirmation message published", slog.Int("video_id", task.VideoID))
+	slog.Info("Confirmation message published", slog.Int("video_id", task.VideoID))
 
 	return
 }
@@ -96,19 +97,7 @@ func (vc *VideoConverter) processVideo(task *VideoTask) error {
 	slog.Info("Converting video to mpeg-dash", slog.String("path", task.Path))
 	ffmpegCmd := exec.Command("ffmpeg",
 		"-i", mergedFile,
-		"-map", "0",
-		"-c:v", "libx264",
-		"-b:v", "2M",
-		"-c:a", "aac",
-		"-b:a", "128k",
-		"-preset", "fast",
-		"-keyint_min", "60",
-		"-g", "60",
-		"-sc_threshold", "0",
 		"-f", "dash",
-		"-seg_duration", "4",
-		"-init_seg_name", "init-stream$RepresentationID$.m4s",
-		"-media_seg_name", "chunk-stream$RepresentationID$-$Number$.m4s",
 		filepath.Join(mpegDashPath, "output.mpd"),
 	)
 

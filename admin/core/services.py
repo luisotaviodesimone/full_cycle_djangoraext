@@ -129,7 +129,7 @@ class VideoService:
                 producer.publish(
                     {
                         "video_id": video_id,
-                        "video_path": video_path,
+                        "path": video_path,
                     },
                     routing_key=queue.routing_key,
                     exchange=queue.exchange,
@@ -141,7 +141,16 @@ class VideoService:
         source_path = self.get_chunk_directory(video_id)
         dest_path = f'{settings.ENVIRONMENT["EXTERNAL_STORAGE"]}/{video_id}'
         self.storage.move_chunks(source_path, dest_path)
-        # self.__produce_message(video_id, dest_path, 'conversion')
+        self.__produce_message(video_id, dest_path, 'conversion')
+
+    def register_processed_video_path(self, video_id: int, video_path: str) -> None:
+        video = self.find_video(video_id)
+        video_media = video.video_media
+        if video_media.status != VideoMedia.Status.PROCESS_STARTED:
+            raise VideoMediaInvalidStatusException('Processing must be started to finish it.')
+        video_media.video_path = video_path.replace(str(settings.ENVIRONMENT["EXTERNAL_STORAGE"]), '') + '/mpeg-dash/output.mpd'
+        video_media.status = VideoMedia.Status.PROCESS_FINISHED
+        video_media.save()
 
 def create_video_service_factory() -> VideoService:
     return VideoService(Storage())

@@ -9,7 +9,7 @@ services:
     restart: always
   django:
     build:
-      context: ./django
+      context: ./admin
       dockerfile: Dockerfile
     environment:
       CHUNKS_DIRECTORY: /tmp/videos
@@ -21,7 +21,7 @@ services:
     ports:
     - 8000:8000
     volumes:
-    - ./django:/app
+    - ./admin:/app
     - external-storage:/media/uploads
   go_app_dev:
     build:
@@ -46,6 +46,9 @@ services:
     volumes:
     - ./golang:/app
     - external-storage:/media/uploads
+    depends_on:
+    - db
+    - rabbitmq
   pgadmin:
     depends_on:
     - db
