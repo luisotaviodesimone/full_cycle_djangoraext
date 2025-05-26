@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS("Starting consumer..."))
         exchange_name = str(settings.ENVIRONMENT["RABBITMQ_EXCHANGE"])
-        routing_key = "finish_conversion"
+        routing_key = "finish-conversion"
         queue_name = routing_key
         queue = use_rabbitmq_queue(queue_name, exchange_name, routing_key)
 
